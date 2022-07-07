@@ -35,6 +35,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MDInput from "../../components/MDInput";
 import MDAlert from "../../components/MDAlert";
+import { registerNewUser } from "../../services";
 
 const schema = yup.object().shape({
   username: yup.string().required("name is required").min(8).label("Name"),
@@ -47,6 +48,7 @@ const schema = yup.object().shape({
       "Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and one special case Character"
     )
     .label("Password"),
+  master_secret: yup.string().required("Master secret is required").label("Master secret"),
 });
 function Registration() {
   const navigate = useNavigate();
@@ -60,6 +62,7 @@ function Registration() {
   };
 
   const [errMsg, setErrMsg] = useState("");
+  // eslint-disable-next-line no-unused-vars
   const [errCode, setErrCode] = useState(0);
   // alert 200 404 500
   const [showSuccess, setShowSuccess] = useState(false);
@@ -69,17 +72,16 @@ function Registration() {
   useEffect(() => {
     setErrMsg("");
     setErrCode(0);
-    setShowSuccess(true);
-    setShowWarning(false);
-    setShowDanger(false);
   }, []);
 
   const handleSubmit = async (values) => {
-    console.log(values);
-    console.log(errMsg);
-    console.log(errCode);
     try {
-      const response = "from backend";
+      const response = await registerNewUser(
+        values.username,
+        values.email,
+        values.password,
+        values.master_secret
+      );
 
       if (response) {
         setErrCode(200);
@@ -163,6 +165,7 @@ function Registration() {
                     username: "",
                     email: "",
                     password: "",
+                    master_secret: "",
                   }}
                 >
                   {/* eslint-disable-next-line no-shadow */}
@@ -181,7 +184,7 @@ function Registration() {
                     <MDBox component="form" role="form" onSubmit={handleSubmit}>
                       <MDBox mb={2}>
                         <MDInput
-                          label="username"
+                          label="Username"
                           type="text"
                           id="username"
                           name="username"
@@ -198,7 +201,7 @@ function Registration() {
                       </MDBox>
                       <MDBox mb={2}>
                         <MDInput
-                          label="email"
+                          label="Email"
                           type="text"
                           id="email"
                           name="email"
@@ -213,7 +216,7 @@ function Registration() {
                       </MDBox>
                       <MDBox mb={2}>
                         <MDInput
-                          label="password"
+                          label="New Password"
                           type="password"
                           id="password"
                           name="password"
@@ -221,11 +224,30 @@ function Registration() {
                           value={values.password}
                           onChange={handleChange}
                           onBlur={handleBlur}
-                          error={!!(touched.password && errors.email)}
+                          error={!!(touched.password && errors.password)}
                           fullWidth
                         />
                         <p style={myStyle}>
                           {touched.password && errors.password ? errors.password : ""}
+                        </p>
+                      </MDBox>
+                      <MDBox mb={2}>
+                        <MDInput
+                          label="Master Secret Code"
+                          type="password"
+                          id="master_secret"
+                          name="master_secret"
+                          placeholder=""
+                          value={values.master_secret}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                          error={!!(touched.master_secret && errors.master_secret)}
+                          fullWidth
+                        />
+                        <p style={myStyle}>
+                          {touched.master_secret && errors.master_secret
+                            ? errors.master_secret
+                            : ""}
                         </p>
                       </MDBox>
                       <MDBox mt={4} mb={1}>

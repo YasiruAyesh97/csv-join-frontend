@@ -34,6 +34,7 @@ import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import { useNavigate } from "react-router-dom";
 import MDAlert from "../../components/MDAlert";
+import { uploadCSVFile } from "../../services";
 
 function Notifications() {
   const navigate = useNavigate();
@@ -46,6 +47,7 @@ function Notifications() {
   };
 
   const [errMsg, setErrMsg] = useState("");
+  // eslint-disable-next-line no-unused-vars
   const [errCode, setErrCode] = useState(0);
   // alert 200 404 500
   const [showSuccess, setShowSuccess] = useState(false);
@@ -55,9 +57,6 @@ function Notifications() {
   useEffect(() => {
     setErrMsg("");
     setErrCode(0);
-    setShowSuccess(true);
-    setShowWarning(false);
-    setShowDanger(false);
   }, []);
 
   // file
@@ -70,7 +69,6 @@ function Notifications() {
     setFilesErr(false);
     const Files = newFiles.filter((file) => !files.find((f) => f.data === file.data));
     setFiles([...files, ...Files]);
-    console.log(typeof files);
   };
 
   const handleDelete = (deleted) => {
@@ -78,12 +76,10 @@ function Notifications() {
     if (files.length - 1 === 0) {
       setFilesErr(true);
     }
-
-    console.log(`total file count: ${files.length - 1}`);
   };
 
   // dynamic input
-  const [value, setValue] = useState([]);
+  const [tags, setTags] = useState([]);
   const [tagErr, setTagErr] = useState(true);
   const [tagTouched, setTouchedErr] = useState(false);
   const handleKeyDown = (event) => {
@@ -94,7 +90,7 @@ function Notifications() {
         event.preventDefault();
         event.stopPropagation();
         if (event.target.value.length > 0) {
-          setValue([...value, event.target.value]);
+          setTags([...tags, event.target.value]);
         }
         break;
       }
@@ -104,25 +100,18 @@ function Notifications() {
   // submit
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("handleSubmit called");
-    console.log(files.map((f) => JSON.stringify(f)));
-    console.log(`tags :${value}`);
-    console.log(`tagErr :${tagErr}`);
-    console.log(`tagTouched :${tagTouched}`);
-    console.log(errCode);
-
-    const data = new FormData();
-
     try {
-      const response = "from backend";
-
+      const response = uploadCSVFile(
+        files.map((f) => JSON.stringify(f)),
+        tags
+      );
       if (response) {
+        setFiles([]);
+        setTags([]);
         setErrCode(200);
         setShowSuccess(true);
         setErrMsg("Add new record successful");
       }
-
-      // navigate(from, { replace: true });
     } catch (err) {
       if (!err?.response) {
         setErrMsg("No Server Response");
@@ -198,11 +187,10 @@ function Notifications() {
                       id="tags-outlined"
                       options={["csv"]}
                       getOptionLabel={(option) => option.title || option}
-                      value={value}
+                      value={tags}
                       onChange={(event, newValue) => {
                         setTouchedErr(true);
-                        setValue(newValue);
-                        console.log(`newValue.length : ${newValue.length}`);
+                        setTags(newValue);
                         if (newValue.length > 0) {
                           setTagErr(false);
                         } else {

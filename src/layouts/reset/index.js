@@ -35,17 +35,10 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MDInput from "../../components/MDInput";
 import MDAlert from "../../components/MDAlert";
+import { changePassword } from "../../services";
 
 const schema = yup.object().shape({
-  password: yup
-    .string()
-    .required("Password is required")
-    .matches(
-      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/,
-      "Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and one special case Character"
-    )
-    .label("Password"),
-  conformPassword: yup.string().oneOf([yup.ref("password"), null], "Passwords must match"),
+  newPassword: yup.string().required("Password is required"),
 });
 function Reset() {
   const navigate = useNavigate();
@@ -59,6 +52,7 @@ function Reset() {
   };
 
   const [errMsg, setErrMsg] = useState("");
+  // eslint-disable-next-line no-unused-vars
   const [errCode, setErrCode] = useState(0);
   // alert 200 404 500
   const [showSuccess, setShowSuccess] = useState(false);
@@ -68,17 +62,11 @@ function Reset() {
   useEffect(() => {
     setErrMsg("");
     setErrCode(0);
-    setShowSuccess(true);
-    setShowWarning(false);
-    setShowDanger(false);
   }, []);
 
   const handleSubmit = async (values) => {
-    console.log(values);
-    console.log(errMsg);
-    console.log(errCode);
     try {
-      const response = "from backend";
+      const response = changePassword(values.oldPassword, values.newPassword);
 
       if (response) {
         setErrCode(200);
@@ -159,8 +147,8 @@ function Reset() {
                   validationSchema={schema}
                   onSubmit={handleSubmit}
                   initialValues={{
-                    password: "",
-                    conformPassword: "",
+                    oldPassword: "",
+                    newPassword: "",
                   }}
                 >
                   {/* eslint-disable-next-line no-shadow */}
@@ -179,38 +167,32 @@ function Reset() {
                     <MDBox component="form" role="form" onSubmit={handleSubmit}>
                       <MDBox mb={2}>
                         <MDInput
-                          label="new password"
+                          label="Old Password"
                           type="password"
-                          id="password"
-                          name="password"
+                          id="oldPassword"
+                          name="oldPassword"
                           placeholder=""
-                          value={values.password}
+                          value={values.oldPassword}
                           onChange={handleChange}
                           onBlur={handleBlur}
-                          error={!!(touched.password && errors.email)}
                           fullWidth
                         />
-                        <p style={myStyle}>
-                          {touched.password && errors.password ? errors.password : ""}
-                        </p>
                       </MDBox>
                       <MDBox mb={2}>
                         <MDInput
-                          label="conform password"
+                          label="New Password"
                           type="password"
-                          id="conformPassword"
-                          name="conformPassword"
+                          id="newPassword"
+                          name="newPassword"
                           placeholder=""
-                          value={values.conformPassword}
+                          value={values.newPassword}
                           onChange={handleChange}
                           onBlur={handleBlur}
-                          error={!!(touched.conformPassword && errors.conformPassword)}
+                          error={!!(touched.newPassword && errors.newPassword)}
                           fullWidth
                         />
                         <p style={myStyle}>
-                          {touched.conformPassword && errors.conformPassword
-                            ? errors.conformPassword
-                            : ""}
+                          {touched.newPassword && errors.newPassword ? errors.newPassword : ""}
                         </p>
                       </MDBox>
                       <MDBox mt={4} mb={1}>
